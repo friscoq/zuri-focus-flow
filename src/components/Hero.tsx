@@ -45,9 +45,7 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
         >
           <h1 className="text-5xl md:text-7xl font-display font-light text-foreground leading-[1.1] tracking-tight">
-            Work That Flows,
-            <br />
-            <span className="text-text-emphasis">plan smarter</span>
+            Work That Flows
           </h1>
           
           <p className="text-xl md:text-2xl text-text-subtle max-w-2xl mx-auto leading-relaxed font-light">
