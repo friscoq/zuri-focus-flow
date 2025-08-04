@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Morphic background shapes */}
@@ -58,6 +61,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="space-y-4"
         >
           <Button 
             size="lg" 
@@ -65,6 +69,16 @@ const Hero = () => {
           >
             Join the waitlist
           </Button>
+          
+          <div>
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/login')}
+              className="text-text-subtle hover:text-foreground border-border/30 hover:border-border/50"
+            >
+              Early Access
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>
