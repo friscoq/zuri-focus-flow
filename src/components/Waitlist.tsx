@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Waitlist = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +11,12 @@ const Waitlist = () => {
     e.preventDefault();
     // Handle waitlist submission here
     setIsSubmitted(true);
+    
+    // Auto-reset after 4 seconds
+    setTimeout(() => {
+      setIsSubmitted(false);
+      setEmail("");
+    }, 4000);
   };
 
   return (
@@ -64,7 +70,7 @@ const Waitlist = () => {
               <div className="w-12 h-12 bg-glow-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="w-6 h-6 bg-glow-primary rounded-full animate-glow-pulse" />
               </div>
-              <h3 className="text-xl font-display text-text-emphasis mb-2">You're on the list!</h3>
+              <h3 className="text-xl font-display text-text-emphasis mb-2">You're on the waitlist.</h3>
               <p className="text-text-subtle">We'll reach out soon with early access</p>
             </motion.div>
           )}

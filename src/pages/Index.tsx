@@ -4,6 +4,7 @@ import Features from "@/components/Features";
 import Preview from "@/components/Preview";
 import Waitlist from "@/components/Waitlist";
 import AccessibilityToggle from "@/components/AccessibilityToggle";
+import FAQDrawer from "@/components/FAQDrawer";
 
 const Index = () => {
   return (
@@ -17,6 +18,8 @@ const Index = () => {
         <Preview />
         <Waitlist />
       </main>
+
+      <FAQDrawer />
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-border/30">
