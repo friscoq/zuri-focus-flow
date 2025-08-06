@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
@@ -8,10 +8,15 @@ import AskZuriChat from './AskZuriChat'
 import TaskPlanner from './TaskPlanner'
 import WorkdayTimer from './WorkdayTimer'
 import FeedbackDialog from './FeedbackDialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/hooks/use-toast'
 
 const Dashboard = () => {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const [focusIntent, setFocusIntent] = useState('')
 
   const handleSignOut = async () => {
     await signOut()
@@ -53,8 +58,14 @@ const Dashboard = () => {
 
       {/* Main Dashboard Content */}
       <div className="relative z-10 min-h-screen p-6">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <WorkdayTimer />
+<Card id="workday-timer" className="bg-card/90 backdrop-blur-sm border-border">
+  <CardHeader className="pb-2">
+    <CardTitle className="text-base">Focus Timer</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <WorkdayTimer />
+  </CardContent>
+</Card>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -117,9 +128,31 @@ const Dashboard = () => {
                   Your Focus Zone
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  This is your distraction-free workspace. Use the task planner to organize your day, 
-                  and chat with Zuri when you need guidance or feel stuck.
+                  Define your next focus and start a calm, time-boxed session.
                 </p>
+                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                  <Input
+                    value={focusIntent}
+                    onChange={(e) => setFocusIntent(e.target.value)}
+                    placeholder="What will you focus on next?"
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={() => {
+                      toast({ title: 'Focus started', description: focusIntent ? `Intent: ${focusIntent}` : 'You got this.' })
+                      document.getElementById('workday-timer')?.scrollIntoView({ behavior: 'smooth' })
+                    }}
+                    disabled={!focusIntent.trim()}
+                  >
+                    Start focus
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById('workday-timer')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    Timer settings
+                  </Button>
+                </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="p-4 bg-primary/5 rounded-lg">
                     <h3 className="font-medium text-foreground mb-2">💡 Smart Suggestions</h3>

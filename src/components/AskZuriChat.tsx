@@ -110,24 +110,26 @@ const AskZuriChat = () => {
   return (
     <>
       {/* Chat Toggle Button */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1, duration: 0.3 }}
-        className="fixed bottom-6 right-6 z-40"
-      >
-        <Button
-          onClick={() => setIsOpen(!isOpen)}
-          className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
-          size="icon"
-        >
-          {isOpen ? (
-            <Minimize2 className="w-6 h-6" />
-          ) : (
-            <MessageCircle className="w-6 h-6" />
-          )}
-        </Button>
-      </motion.div>
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            transition={{ delay: 1, duration: 0.3 }}
+            className="fixed bottom-6 right-6 z-40"
+          >
+            <Button
+              onClick={() => setIsOpen(true)}
+              className="h-14 w-14 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+              size="icon"
+              aria-label="Open Ask Zuri chat"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -140,12 +142,17 @@ const AskZuriChat = () => {
             className="fixed bottom-24 right-6 w-80 h-96 z-50"
           >
             <Card className="h-full bg-card/95 backdrop-blur-sm border-border">
-              <CardHeader className="pb-3">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   Ask Zuri
                 </CardTitle>
-              </CardHeader>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsOpen(false)} aria-label="Close chat">
+                  <Minimize2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
               <CardContent className="flex flex-col h-full p-0">
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto px-4 space-y-3">
@@ -193,7 +200,7 @@ const AskZuriChat = () => {
                     <Input
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
-                      onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyPress}
                       placeholder="Type your message..."
                       className="flex-1"
                     />
