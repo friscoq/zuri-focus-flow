@@ -175,7 +175,7 @@ const addTask = () => {
     onClick={() => setShowDetails((v) => !v)}
     aria-expanded={showDetails}
   >
-    {showDetails ? 'Hide details' : 'Add details'}
+    {showDetails ? 'Hide details' : 'More details'}
   </Button>
 </div>
 <AnimatePresence>
@@ -266,19 +266,15 @@ const addTask = () => {
                       <div className={`p-1 rounded ${taskTypes[task.type].color}`}>
                         <TaskIcon className="w-3 h-3" />
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
-                        className="h-6 w-6 p-0"
-                        aria-label="Toggle task details"
-                      >
-                        {expandedTaskId === task.id ? (
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        ) : (
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        )}
-                      </Button>
+<Button
+  variant="ghost"
+  size="sm"
+  onClick={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+  className="h-7 px-2 text-xs"
+  aria-label="Toggle task details"
+>
+  {expandedTaskId === task.id ? 'Hide details' : 'More details'}
+</Button>
                       <Button
                         variant="ghost"
                         size="icon"

@@ -11,6 +11,8 @@ import FeedbackDialog from './FeedbackDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Lightbulb, MessageCircle } from 'lucide-react'
 
 const Dashboard = () => {
   const { signOut, user } = useAuth()
@@ -59,7 +61,7 @@ const Dashboard = () => {
       {/* Main Dashboard Content */}
       <div className="relative z-10 min-h-screen p-6">
         <div className="max-w-6xl mx-auto space-y-8">
-<Card id="workday-timer" className="bg-card/90 backdrop-blur-sm border-border">
+<Card id="workday-timer" className="bg-card/80 backdrop-blur-sm border-border">
   <CardHeader className="pb-2">
     <CardTitle className="text-base">Focus Timer</CardTitle>
   </CardHeader>
@@ -123,7 +125,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, duration: 0.4 }}
-                className="bg-card/90 backdrop-blur-sm border border-border rounded-lg p-8 h-full"
+                className="bg-card/80 backdrop-blur-sm border border-border rounded-lg p-10 h-full"
               >
                 <h2 className="text-2xl font-semibold text-foreground mb-4">
                   Your Focus Zone
@@ -154,16 +156,33 @@ const Dashboard = () => {
                     Timer settings
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="p-4 bg-primary/5 rounded-lg">
-                    <h3 className="font-medium text-foreground mb-2">💡 Smart Suggestions</h3>
-                    <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
-                  </div>
-                  <div className="p-4 bg-secondary/5 rounded-lg">
-                    <h3 className="font-medium text-foreground mb-2">🧠 AI Assistant</h3>
-                    <p className="text-muted-foreground">Chat with Zuri when you need help or motivation</p>
-                  </div>
-                </div>
+<Tabs defaultValue="none" className="mt-2">
+  <TabsList className="justify-end flex bg-transparent p-0 gap-1">
+    <TabsTrigger value="suggestions" className="px-2" aria-label="Smart Suggestions">
+      <Lightbulb className="h-4 w-4" />
+    </TabsTrigger>
+    <TabsTrigger value="assistant" className="px-2" aria-label="AI Assistant">
+      <MessageCircle className="h-4 w-4" />
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="suggestions" className="mt-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div className="p-4 bg-muted/40 rounded-lg">
+        <h3 className="font-medium text-foreground mb-2">Smart Suggestions</h3>
+        <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
+      </div>
+      <div className="p-4 bg-muted/40 rounded-lg">
+        <h3 className="font-medium text-foreground mb-2">Focus advice</h3>
+        <p className="text-muted-foreground">Break tasks down and celebrate small wins</p>
+      </div>
+    </div>
+  </TabsContent>
+  <TabsContent value="assistant" className="mt-4">
+    <p className="text-sm text-muted-foreground">
+      Open the Ask Zuri chat via the button at the bottom-right when you need help or motivation.
+    </p>
+  </TabsContent>
+</Tabs>
               </motion.div>
             </div>
           </motion.div>
