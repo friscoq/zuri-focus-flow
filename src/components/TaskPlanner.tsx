@@ -1,15 +1,19 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, CheckCircle2, Circle, Zap, Focus, Settings, Trash2 } from 'lucide-react'
+import { Plus, CheckCircle2, Circle, Zap, Focus, Settings, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { formatDistanceToNow } from 'date-fns'
 
 interface Task {
   id: string
   text: string
   type: 'light' | 'deep' | 'admin'
+  priority: 'low' | 'medium' | 'high'
   completed: boolean
   createdAt: Date
 }
@@ -19,6 +23,7 @@ const TaskPlanner = () => {
   const [newTaskText, setNewTaskText] = useState('')
   const [selectedType, setSelectedType] = useState<'light' | 'deep' | 'admin'>('light')
   const [isAddingTask, setIsAddingTask] = useState(false)
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
 
   const taskTypes = {
     light: { 
@@ -48,8 +53,9 @@ const TaskPlanner = () => {
       id: Date.now().toString(),
       text: newTaskText,
       type: selectedType,
+      priority: 'medium',
       completed: false,
-      createdAt: new Date()
+      createdAt: new Date(),
     }
 
     setTasks(prev => [...prev, newTask])
@@ -69,6 +75,12 @@ const TaskPlanner = () => {
 
   const deleteTask = (taskId: string) => {
     setTasks(prev => prev.filter(task => task.id !== taskId))
+  }
+
+  const updatePriority = (taskId: string, priority: 'low' | 'medium' | 'high') => {
+    setTasks(prev =>
+      prev.map(task => (task.id === taskId ? { ...task, priority } : task))
+    )
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -161,48 +173,97 @@ const TaskPlanner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                  className={`p-3 rounded-lg border transition-all ${
                     task.completed 
                       ? 'bg-muted/50 border-muted' 
                       : 'bg-background border-border hover:border-border/60'
                   }`}
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => toggleTask(task.id)}
-                    className="h-6 w-6 p-0"
-                  >
-                    {task.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-                    )}
-                  </Button>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${
-                      task.completed 
-                        ? 'line-through text-muted-foreground' 
-                        : 'text-foreground'
-                    }`}>
-                      {task.text}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className={`p-1 rounded ${taskTypes[task.type].color}`}>
-                      <TaskIcon className="w-3 h-3" />
-                    </div>
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteTask(task.id)}
-                      className="h-6 w-6 p-0 hover:text-destructive"
+                      onClick={() => toggleTask(task.id)}
+                      className="h-6 w-6 p-0"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      {task.completed ? (
+                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <Circle className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                      )}
                     </Button>
+
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm ${
+                        task.completed 
+                          ? 'line-through text-muted-foreground' 
+                          : 'text-foreground'
+                      }`}>
+                        {task.text}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className={`p-1 rounded ${taskTypes[task.type].color}`}>
+                        <TaskIcon className="w-3 h-3" />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                        className="h-6 w-6 p-0"
+                        aria-label="Toggle task details"
+                      >
+                        {expandedTaskId === task.id ? (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteTask(task.id)}
+                        className="h-6 w-6 p-0 hover:text-destructive"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
+
+                  <AnimatePresence>
+                    {expandedTaskId === task.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-3 rounded-md border border-border bg-muted/30 p-3"
+                      >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Priority</Label>
+                            <Select
+                              value={task.priority}
+                              onValueChange={(val) => updatePriority(task.id, val as 'low' | 'medium' | 'high')}
+                            >
+                              <SelectTrigger className="h-8 mt-1">
+                                <SelectValue placeholder="Select priority" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="text-xs text-muted-foreground sm:text-right">
+                            Added {formatDistanceToNow(task.createdAt)} ago
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               )
             })}

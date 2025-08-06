@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import SuggestionBar from './SuggestionBar'
 import AskZuriChat from './AskZuriChat'
 import TaskPlanner from './TaskPlanner'
+import WorkdayTimer from './WorkdayTimer'
 import FeedbackDialog from './FeedbackDialog'
 
 const Dashboard = () => {
@@ -52,8 +53,8 @@ const Dashboard = () => {
 
       {/* Main Dashboard Content */}
       <div className="relative z-10 min-h-screen p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header Section */}
+        <div className="max-w-6xl mx-auto space-y-8">
+          <WorkdayTimer />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
