@@ -43,7 +43,7 @@ const LoginForm = () => {
           variant: "destructive",
         })
       } else {
-        navigate('/dashboard')
+        navigate('/onboarding')
       }
     } catch (error) {
       toast({
@@ -139,7 +139,13 @@ const LoginForm = () => {
             </form>
           </Form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center space-y-2">
+            <Button
+              variant="link"
+              onClick={() => navigate('/signup')}
+            >
+              Don't have an account? Sign Up
+            </Button>
             <Button
               variant="ghost"
               onClick={() => navigate('/')}

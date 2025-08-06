@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import SuggestionBar from './SuggestionBar'
 import AskZuriChat from './AskZuriChat'
 import TaskPlanner from './TaskPlanner'
+import FeedbackDialog from './FeedbackDialog'
 
 const Dashboard = () => {
   const { signOut, user } = useAuth()
@@ -139,13 +140,16 @@ const Dashboard = () => {
             transition={{ delay: 1, duration: 0.5 }}
             className="text-center"
           >
-            <Button
-              variant="outline"
-              onClick={handleSignOut}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Sign Out
-            </Button>
+            <div className="flex items-center justify-center gap-3">
+              <FeedbackDialog />
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Sign Out
+              </Button>
+            </div>
           </motion.div>
         </div>
       </div>
