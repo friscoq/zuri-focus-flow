@@ -4,6 +4,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger, Drawer
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
 import { toast } from '@/components/ui/sonner'
 import { Pause, Play, Settings2, Timer as TimerIcon } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -15,8 +16,9 @@ interface TimerSettings {
   workdayStart: string
   workdayEnd: string
   nudgeInterval: 5 | 10 | 15 | 20
+  desktopNotifications: boolean
   soundEnabled: boolean
-  soundType: 'none' | 'custom'
+  soundType: 'none' | 'chime' | 'bell' | 'custom'
   customSound?: string
   volume: number
 }
@@ -28,8 +30,9 @@ const DEFAULT_SETTINGS: TimerSettings = {
   workdayStart: '09:00',
   workdayEnd: '17:00',
   nudgeInterval: 15,
+  desktopNotifications: true,
   soundEnabled: true,
-  soundType: 'none',
+  soundType: 'chime',
   volume: 0.6,
 }
 
@@ -147,8 +150,18 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
     const name = focusLabel?.trim() || 'your focus'
     return `You're on ${name} — ${elapsedMin} minutes elapsed. ${hoursLeftStr} hours left in your workday, ${taskCount} tasks remain${taskCount ? ': ' + taskList : '.'}`
   }
+  const handleTestNotification = async () => {
+    const msg = buildNudgeMessage()
+    const ok = await ensureNotificationPermission()
+    if (!ok) {
+      toast('Enable notifications', { description: 'Please allow notifications in your browser.' })
+    }
+    showSystemNotification('Test notification', msg)
+    playSound()
+  }
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <div id="workday-timer" className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       {/* Subtle progress bar */}
       <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
         <div
@@ -255,6 +268,91 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
         onCheckedChange={(val) => setSettings((s) => ({ ...s, nudges: val }))}
       />
     </div>
+  </div>
+  {/* Notifications */}
+  <div className="grid grid-cols-2 gap-4 items-center">
+    <div className="flex items-center justify-between">
+      <Label htmlFor="desktop-notifs">Desktop notifications</Label>
+      <Switch
+        id="desktop-notifs"
+        checked={settings.desktopNotifications}
+        onCheckedChange={async (val) => {
+          setSettings((s) => ({ ...s, desktopNotifications: val }))
+          if (val) {
+            const ok = await ensureNotificationPermission()
+            if (!ok) {
+              toast('Notifications blocked', { description: 'Please allow notifications in your browser.' })
+            }
+          }
+        }}
+      />
+    </div>
+    <div className="flex items-center justify-between">
+      <Label htmlFor="sound-enabled">Sound</Label>
+      <Switch
+        id="sound-enabled"
+        checked={settings.soundEnabled}
+        onCheckedChange={(val) => setSettings((s) => ({ ...s, soundEnabled: val }))}
+      />
+    </div>
+  </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <Label htmlFor="sound-type">Sound type</Label>
+      <Select
+        value={settings.soundType}
+        onValueChange={(val) => setSettings((s) => ({ ...s, soundType: val as TimerSettings['soundType'] }))}
+      >
+        <SelectTrigger id="sound-type" className="h-8 mt-1">
+          <SelectValue placeholder="Choose sound" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="none">None</SelectItem>
+          <SelectItem value="chime">Gentle chime</SelectItem>
+          <SelectItem value="bell">Soft bell</SelectItem>
+          <SelectItem value="custom">Custom upload</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+    <div className="pt-6">
+      <Label className="text-xs text-muted-foreground">Volume</Label>
+      <div className="mt-2">
+        <Slider
+          value={[Math.round(settings.volume * 100)]}
+          onValueChange={(v) => setSettings((s) => ({ ...s, volume: (v[0] ?? 60) / 100 }))}
+          min={0}
+          max={100}
+          step={1}
+          className="w-full"
+        />
+      </div>
+    </div>
+  </div>
+
+  {settings.soundType === 'custom' && (
+    <div className="grid grid-cols-1 gap-2">
+      <Label htmlFor="custom-sound">Upload custom sound</Label>
+      <Input
+        id="custom-sound"
+        type="file"
+        accept="audio/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (!file) return
+          const reader = new FileReader()
+          reader.onload = () => {
+            const dataUrl = reader.result as string
+            setSettings((s) => ({ ...s, customSound: dataUrl, soundType: 'custom' }))
+          }
+          reader.readAsDataURL(file)
+        }}
+      />
+    </div>
+  )}
+
+  <div className="pt-2">
+    <Button variant="secondary" onClick={handleTestNotification}>Test Notification</Button>
   </div>
 </div>
               <DrawerFooter>

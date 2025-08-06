@@ -20,6 +20,7 @@ const Dashboard = () => {
   const { toast } = useToast()
   const [focusIntent, setFocusIntent] = useState('')
   const [extrasTab, setExtrasTab] = useState<'none' | 'suggestions' | 'assistant'>('none')
+  const [tasksForTimer, setTasksForTimer] = useState<{ text: string; completed: boolean }[]>([])
 
   const handleSignOut = async () => {
     await signOut()
@@ -109,7 +110,7 @@ const Dashboard = () => {
           >
             {/* Task Planner */}
             <div className="lg:col-span-1">
-              <TaskPlanner />
+              <TaskPlanner onTasksChange={(tasks: any[]) => setTasksForTimer(tasks.map((t: any) => ({ text: t.text, completed: t.completed })))} />
             </div>
             
             {/* Main Focus Area */}
@@ -190,7 +191,7 @@ const Dashboard = () => {
             </div>
           </motion.div>
 
-          <WorkdayTimer focusLabel={focusIntent} />
+          <WorkdayTimer focusLabel={focusIntent} tasks={tasksForTimer} />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

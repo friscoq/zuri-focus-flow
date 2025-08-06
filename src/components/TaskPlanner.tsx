@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, CheckCircle2, Circle, Zap, Focus, Settings, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,7 @@ interface Task {
   createdAt: Date
 }
 
-const TaskPlanner = () => {
+const TaskPlanner = ({ onTasksChange }: { onTasksChange?: (tasks: Task[]) => void }) => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTaskText, setNewTaskText] = useState('')
   const [selectedType, setSelectedType] = useState<'light' | 'deep' | 'admin'>('light')
@@ -29,6 +29,8 @@ const TaskPlanner = () => {
   const [showDetails, setShowDetails] = useState(false)
   const [isAddingTask, setIsAddingTask] = useState(false)
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
+
+  useEffect(() => { onTasksChange?.(tasks) }, [tasks, onTasksChange])
 
   const taskTypes = {
     light: { 
