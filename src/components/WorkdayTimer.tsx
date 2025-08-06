@@ -10,6 +10,18 @@ import { Pause, Play, Settings2, Timer as TimerIcon } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ensureNotificationPermission, showSystemNotification } from '@/lib/notifications'
 
+// Supabase Storage public URLs for notification sounds
+const SUPABASE_PUBLIC_BASE = 'https://bzdfyikvgkolunfmghdk.supabase.co/storage/v1/object/public'
+const SOUND_BUCKET = 'notification-sounds'
+const SOUND_FILES = {
+  ringtone90s: '90s Ringtone.wav',
+  subtle: 'Subtle.wav',
+  soft: 'Soft.wav',
+  dontClickMe: "Don't Click Me.mp3",
+} as const
+
+type SoundKey = keyof typeof SOUND_FILES
+
 interface TimerSettings {
   workMinutes: number
   breakMinutes: number
@@ -19,7 +31,7 @@ interface TimerSettings {
   nudgeInterval: 5 | 10 | 15 | 20
   desktopNotifications: boolean
   soundEnabled: boolean
-  soundType: 'none' | 'chime' | 'bell' | 'custom'
+  soundType: 'none' | SoundKey | 'custom'
   customSound?: string
   volume: number
 }
@@ -33,7 +45,7 @@ const DEFAULT_SETTINGS: TimerSettings = {
   nudgeInterval: 15,
   desktopNotifications: true,
   soundEnabled: true,
-  soundType: 'chime',
+  soundType: 'subtle',
   volume: 0.6,
 }
 
@@ -43,7 +55,15 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
   const [settings, setSettings] = useState<TimerSettings>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
-      return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        const merged = { ...DEFAULT_SETTINGS, ...parsed } as TimerSettings & { soundType?: any }
+        // Migrate older sound keys to new options
+        if (merged.soundType === 'chime') merged.soundType = 'subtle' as any
+        if (merged.soundType === 'bell') merged.soundType = 'soft' as any
+        return merged as TimerSettings
+      }
+      return DEFAULT_SETTINGS
     } catch {
       return DEFAULT_SETTINGS
     }
@@ -77,6 +97,12 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
           toast(nextMode === 'break' ? 'Time for a short break' : 'Back to focus', {
             description: nextMode === 'break' ? 'Stand up, breathe, get water.' : 'Pick one task and go deep.'
           })
+          if (settings.desktopNotifications) {
+            showSystemNotification(
+              nextMode === 'break' ? 'Time for a short break' : 'Back to focus',
+              nextMode === 'break' ? 'Stand up, breathe, get water.' : 'Pick one task and go deep.'
+            )
+          }
         }
         return (nextMode === 'work' ? settings.workMinutes : settings.breakMinutes) * 60
       })
@@ -88,6 +114,9 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
           playSound()
           const msg = buildNudgeMessage()
           toast(msg)
+          if (settings.desktopNotifications) {
+            showSystemNotification('Nudge', msg)
+          }
           return 0
         }
         return next
@@ -124,10 +153,21 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
   const playSound = () => {
     if (!settings.soundEnabled) return
     try {
-      const src = settings.soundType === 'custom' && settings.customSound ? settings.customSound : undefined
+      let src: string | undefined
+      if (settings.soundType === 'none') return
+      if (settings.soundType === 'custom' && settings.customSound) {
+        src = settings.customSound
+      } else if (settings.soundType && settings.soundType in SOUND_FILES) {
+        const filename = SOUND_FILES[settings.soundType as SoundKey]
+        src = `${SUPABASE_PUBLIC_BASE}/${SOUND_BUCKET}/${encodeURIComponent(filename)}`
+      }
       if (!src) return
-      if (!audioRef.current) audioRef.current = new Audio(src)
-      else audioRef.current.src = src
+      if (!audioRef.current) {
+        audioRef.current = new Audio()
+        // Allow CORS for public files (not strictly needed for playback, but harmless)
+        audioRef.current.crossOrigin = 'anonymous'
+      }
+      audioRef.current.src = src
       audioRef.current.volume = settings.volume
       audioRef.current.currentTime = 0
       audioRef.current.play().catch(() => {})
@@ -310,8 +350,10 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">None</SelectItem>
-          <SelectItem value="chime">Gentle chime</SelectItem>
-          <SelectItem value="bell">Soft bell</SelectItem>
+          <SelectItem value="ringtone90s">90s Ringtone</SelectItem>
+          <SelectItem value="subtle">Subtle</SelectItem>
+          <SelectItem value="soft">Soft</SelectItem>
+          <SelectItem value="dontClickMe">Don't Click Me</SelectItem>
           <SelectItem value="custom">Custom upload</SelectItem>
         </SelectContent>
       </Select>
