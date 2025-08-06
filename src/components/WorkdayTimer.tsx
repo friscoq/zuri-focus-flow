@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider'
 import { toast } from '@/components/ui/sonner'
 import { Pause, Play, Settings2, Timer as TimerIcon } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ensureNotificationPermission, showSystemNotification } from '@/lib/notifications'
 
 interface TimerSettings {
   workMinutes: number
