@@ -92,6 +92,11 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
     return () => clearInterval(interval)
   }, [isRunning, mode, settings])
 
+  const progress = useMemo(() => {
+    const done = totalSeconds - secondsLeft
+    return Math.max(0, Math.min(100, (done / totalSeconds) * 100))
+  }, [secondsLeft, totalSeconds])
+
   const toggleRun = () => setIsRunning((r) => !r)
   const reset = () => setSecondsLeft(totalSeconds)
 
@@ -142,7 +147,8 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
     const name = focusLabel?.trim() || 'your focus'
     return `You're on ${name} — ${elapsedMin} minutes elapsed. ${hoursLeftStr} hours left in your workday, ${taskCount} tasks remain${taskCount ? ': ' + taskList : '.'}`
   }
-    <div className="relative">
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       {/* Subtle progress bar */}
       <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
         <div
