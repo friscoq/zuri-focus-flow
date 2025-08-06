@@ -34,6 +34,12 @@ const AskZuriChat = () => {
     scrollToBottom()
   }, [messages])
 
+  useEffect(() => {
+    const handler = () => setIsOpen(true)
+    window.addEventListener('zuri:open-chat', handler)
+    return () => window.removeEventListener('zuri:open-chat', handler)
+  }, [])
+
   const generateZuriResponse = (userMessage: string): string => {
     const responses = {
       stuck: [

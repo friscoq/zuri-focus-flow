@@ -11,15 +11,15 @@ import FeedbackDialog from './FeedbackDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Lightbulb, MessageCircle, X } from 'lucide-react'
+
+import { Lightbulb, Zap } from 'lucide-react'
 
 const Dashboard = () => {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [focusIntent, setFocusIntent] = useState('')
-  const [extrasTab, setExtrasTab] = useState<'none' | 'suggestions' | 'assistant'>('none')
+  
   const [tasksForTimer, setTasksForTimer] = useState<{ text: string; completed: boolean }[]>([])
 
   const handleSignOut = async () => {
@@ -140,53 +140,53 @@ const Dashboard = () => {
                       document.getElementById('workday-timer')?.scrollIntoView({ behavior: 'smooth' })
                     }}
                     disabled={!focusIntent.trim()}
+                    className="hover-scale focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     Start focus
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => document.getElementById('workday-timer')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="hover-scale focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     Timer settings
                   </Button>
                 </div>
-<Tabs value={extrasTab} onValueChange={(v) => setExtrasTab(v as any)} className="mt-2">
-  <TabsList className="justify-end flex bg-transparent p-0 gap-1">
-    <TabsTrigger value="suggestions" className="px-2" aria-label="Smart Suggestions">
-      <Lightbulb className="h-4 w-4" />
-    </TabsTrigger>
-    <TabsTrigger value="assistant" className="px-2" aria-label="AI Assistant">
-      <MessageCircle className="h-4 w-4" />
-    </TabsTrigger>
-  </TabsList>
-  <TabsContent value="suggestions" className="mt-4">
-    <div className="flex items-start justify-between">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm flex-1">
-        <div className="p-4 bg-muted/40 rounded-lg">
-          <h3 className="font-medium text-foreground mb-2">Smart Suggestions</h3>
-          <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
-        </div>
-        <div className="p-4 bg-muted/40 rounded-lg">
-          <h3 className="font-medium text-foreground mb-2">Focus advice</h3>
-          <p className="text-muted-foreground">Break tasks down and celebrate small wins</p>
-        </div>
-      </div>
-      <Button variant="ghost" size="icon" className="ml-2" onClick={() => setExtrasTab('none')} aria-label="Close panel">
-        <X className="h-4 w-4" />
-      </Button>
-    </div>
-  </TabsContent>
-  <TabsContent value="assistant" className="mt-4">
-    <div className="flex items-start justify-between">
-      <p className="text-sm text-muted-foreground flex-1">
-        Open the Ask Zuri chat via the button at the bottom-right when you need help or motivation.
-      </p>
-      <Button variant="ghost" size="icon" className="ml-2" onClick={() => setExtrasTab('none')} aria-label="Close panel">
-        <X className="h-4 w-4" />
-      </Button>
-    </div>
-  </TabsContent>
-</Tabs>
+                {/* Always-visible suggestion cards */}
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <button
+                    type="button"
+                    className="p-4 bg-muted/40 rounded-lg text-left hover-scale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-shadow hover:shadow-md"
+                    aria-label="Open Smart Suggestions"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-1.5 bg-primary/10 rounded-full">
+                        <Lightbulb className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-foreground mb-1">Smart Suggestions</h3>
+                        <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="p-4 bg-muted/40 rounded-lg text-left hover-scale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-shadow hover:shadow-md"
+                    onClick={() => window.dispatchEvent(new Event('zuri:open-chat'))}
+                    aria-label="Open Focus advice"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-1.5 bg-primary/10 rounded-full">
+                        <Zap className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-foreground mb-1">Focus advice</h3>
+                        <p className="text-muted-foreground">Break tasks down and celebrate small wins</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </motion.div>
             </div>
           </motion.div>

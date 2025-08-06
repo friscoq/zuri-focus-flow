@@ -111,12 +111,7 @@ const WorkdayTimer: React.FC<{ focusLabel?: string; tasks?: { text: string; comp
       setNudgeCounter((c) => {
         const next = c + 1
         if (mode === 'work' && settings.nudges && isWithinWorkday() && next >= settings.nudgeInterval * 60) {
-          playSound()
-          const msg = buildNudgeMessage()
-          toast(msg)
-          if (settings.desktopNotifications) {
-            showSystemNotification('Nudge', msg)
-          }
+           // reduced popup noise: no toast for periodic nudges
           return 0
         }
         return next
