@@ -12,13 +12,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Lightbulb, MessageCircle } from 'lucide-react'
+import { Lightbulb, MessageCircle, X } from 'lucide-react'
 
 const Dashboard = () => {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [focusIntent, setFocusIntent] = useState('')
+  const [extrasTab, setExtrasTab] = useState<'none' | 'suggestions' | 'assistant'>('none')
 
   const handleSignOut = async () => {
     await signOut()
@@ -59,16 +60,8 @@ const Dashboard = () => {
       </div>
 
       {/* Main Dashboard Content */}
-      <div className="relative z-10 min-h-screen p-6">
+      <div className="relative z-10 min-h-screen p-6 pb-24">
         <div className="max-w-6xl mx-auto space-y-8">
-<Card id="workday-timer" className="bg-card/80 backdrop-blur-sm border-border">
-  <CardHeader className="pb-2">
-    <CardTitle className="text-base">Focus Timer</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <WorkdayTimer />
-  </CardContent>
-</Card>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -156,7 +149,7 @@ const Dashboard = () => {
                     Timer settings
                   </Button>
                 </div>
-<Tabs defaultValue="none" className="mt-2">
+<Tabs value={extrasTab} onValueChange={(v) => setExtrasTab(v as any)} className="mt-2">
   <TabsList className="justify-end flex bg-transparent p-0 gap-1">
     <TabsTrigger value="suggestions" className="px-2" aria-label="Smart Suggestions">
       <Lightbulb className="h-4 w-4" />
@@ -166,28 +159,38 @@ const Dashboard = () => {
     </TabsTrigger>
   </TabsList>
   <TabsContent value="suggestions" className="mt-4">
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-      <div className="p-4 bg-muted/40 rounded-lg">
-        <h3 className="font-medium text-foreground mb-2">Smart Suggestions</h3>
-        <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
+    <div className="flex items-start justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm flex-1">
+        <div className="p-4 bg-muted/40 rounded-lg">
+          <h3 className="font-medium text-foreground mb-2">Smart Suggestions</h3>
+          <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
+        </div>
+        <div className="p-4 bg-muted/40 rounded-lg">
+          <h3 className="font-medium text-foreground mb-2">Focus advice</h3>
+          <p className="text-muted-foreground">Break tasks down and celebrate small wins</p>
+        </div>
       </div>
-      <div className="p-4 bg-muted/40 rounded-lg">
-        <h3 className="font-medium text-foreground mb-2">Focus advice</h3>
-        <p className="text-muted-foreground">Break tasks down and celebrate small wins</p>
-      </div>
+      <Button variant="ghost" size="icon" className="ml-2" onClick={() => setExtrasTab('none')} aria-label="Close panel">
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   </TabsContent>
   <TabsContent value="assistant" className="mt-4">
-    <p className="text-sm text-muted-foreground">
-      Open the Ask Zuri chat via the button at the bottom-right when you need help or motivation.
-    </p>
+    <div className="flex items-start justify-between">
+      <p className="text-sm text-muted-foreground flex-1">
+        Open the Ask Zuri chat via the button at the bottom-right when you need help or motivation.
+      </p>
+      <Button variant="ghost" size="icon" className="ml-2" onClick={() => setExtrasTab('none')} aria-label="Close panel">
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
   </TabsContent>
 </Tabs>
               </motion.div>
             </div>
           </motion.div>
 
-          {/* Footer */}
+          <WorkdayTimer focusLabel={focusIntent} />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

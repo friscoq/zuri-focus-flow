@@ -117,7 +117,7 @@ const AskZuriChat = () => {
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             transition={{ delay: 1, duration: 0.3 }}
-            className="fixed bottom-6 right-6 z-40"
+            className="fixed bottom-20 right-6 z-40"
           >
             <Button
               onClick={() => setIsOpen(true)}
