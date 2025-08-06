@@ -58,6 +58,7 @@ const Dashboard = () => {
 
       {/* Main Dashboard Content */}
       <div className="relative z-10 min-h-screen p-6">
+        <div className="max-w-6xl mx-auto space-y-8">
 <Card id="workday-timer" className="bg-card/90 backdrop-blur-sm border-border">
   <CardHeader className="pb-2">
     <CardTitle className="text-base">Focus Timer</CardTitle>
