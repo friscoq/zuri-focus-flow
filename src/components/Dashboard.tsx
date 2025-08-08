@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
@@ -13,19 +13,40 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 
 import { Lightbulb, Zap } from 'lucide-react'
+import FocusZoneCard from '@/components/FocusZoneCard'
+import { SmartNudgeCenter } from '@/components/SmartNudge'
+import QuickCapture from '@/components/QuickCapture'
+import useShortcuts from '@/hooks/use-shortcuts'
+import AccessibilityToggle from '@/components/AccessibilityToggle'
+import { useNudges } from '@/contexts/NudgeContext'
+import { celebrate } from '@/lib/confetti'
+import { useFocus } from '@/contexts/FocusContext'
 
 const Dashboard = () => {
   const { signOut, user } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [focusIntent, setFocusIntent] = useState('')
-  
   const [tasksForTimer, setTasksForTimer] = useState<{ text: string; completed: boolean }[]>([])
+  const prevCompleted = useRef(0)
+  const { enqueue } = useNudges()
+  const focus = useFocus()
+  useShortcuts()
 
   const handleSignOut = async () => {
     await signOut()
     navigate('/')
   }
+
+  // Celebrate and nudge on task completion increments
+  useEffect(() => {
+    const completed = tasksForTimer.filter(t => t.completed).length
+    if (completed > prevCompleted.current) {
+      celebrate()
+      enqueue({ nudgeType: 'celebration', nudgeText: 'Task completed — nice win!' })
+    }
+    prevCompleted.current = completed
+  }, [tasksForTimer, enqueue])
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,79 +136,7 @@ const Dashboard = () => {
             
             {/* Main Focus Area */}
             <div className="lg:col-span-2">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8, duration: 0.4 }}
-                className="bg-card/80 backdrop-blur-sm border border-border rounded-lg p-10 h-full"
-              >
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
-                  Your Focus Zone
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  Define your next focus and start a calm, time-boxed session.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                  <Input
-                    value={focusIntent}
-                    onChange={(e) => setFocusIntent(e.target.value)}
-                    placeholder="What will you focus on next?"
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={() => {
-                      toast({ title: 'Focus started', description: focusIntent ? `Intent: ${focusIntent}` : 'You got this.' })
-                      document.getElementById('workday-timer')?.scrollIntoView({ behavior: 'smooth' })
-                    }}
-                    disabled={!focusIntent.trim()}
-                    className="hover-scale focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    Start focus
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById('workday-timer')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="hover-scale focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    Timer settings
-                  </Button>
-                </div>
-                {/* Always-visible suggestion cards */}
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <button
-                    type="button"
-                    className="p-4 bg-muted/40 rounded-lg text-left hover-scale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-shadow hover:shadow-md"
-                    aria-label="Open Smart Suggestions"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-1.5 bg-primary/10 rounded-full">
-                        <Lightbulb className="w-4 h-4 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-foreground mb-1">Smart Suggestions</h3>
-                        <p className="text-muted-foreground">Get context-aware nudges and productivity tips</p>
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="p-4 bg-muted/40 rounded-lg text-left hover-scale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-shadow hover:shadow-md"
-                    onClick={() => window.dispatchEvent(new Event('zuri:open-chat'))}
-                    aria-label="Open Focus advice"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-1.5 bg-primary/10 rounded-full">
-                        <Zap className="w-4 h-4 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-foreground mb-1">Focus advice</h3>
-                        <p className="text-muted-foreground">Break tasks down and celebrate small wins</p>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              </motion.div>
+              <FocusZoneCard />
             </div>
           </motion.div>
 
@@ -214,6 +163,8 @@ const Dashboard = () => {
 
       {/* Ask Zuri Chat Assistant */}
       <AskZuriChat />
+      {/* Quick Capture portal */}
+      <QuickCapture />
     </div>
   )
 }
