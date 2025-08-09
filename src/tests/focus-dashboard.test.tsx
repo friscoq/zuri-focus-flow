@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { NudgeProvider } from "@/contexts/NudgeContext";
 import { FocusProvider, useFocus } from "@/contexts/FocusContext";
 import FocusZoneCard from "@/components/FocusZoneCard";
@@ -47,7 +47,7 @@ describe("Focus Dashboard", () => {
     );
     getByText("seed").click();
     const clearBtn = getByLabelText(/clear my mind/i);
-    fireEvent.click(clearBtn);
+    clearBtn.click();
     // focus input becomes empty
     expect(queryByText("Deep work")).toBeNull();
   });
